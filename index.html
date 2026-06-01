@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Combustible" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Control de Rendimiento de Combustible</title>
+
+  <style>
+    :root{
+      --bg1:#08111f;
+      --bg2:#0f172a;
+      --card:#111827;
+      --muted:#94a3b8;
+      --text:#e5e7eb;
+      --title:#f8fafc;
+      --accent:#22c55e;
+      --accent2:#38bdf8;
+      --danger:#fb7185;
+      --line:#273449;
+      --input:#0b1220;
+      --shadow:0 24px 70px rgba(0,0,0,.38);
+    }
+
+    *{box-sizing:border-box}
+
+    html{
+      -webkit-text-size-adjust:100%;
+      touch-action:manipulation;
+    }
+
+    body{
+      margin:0;
+      font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(34,197,94,.18), transparent 30%),
+        linear-gradient(135deg,var(--bg1),var(--bg2) 55%,#052e16);
+      color:var(--text);
+      min-height:100vh;
+      padding:calc(16px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(14px + env(safe-area-inset-left));
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .wrap{max-width:1120px;margin:0 auto}
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border:1px solid rgba(148,163,184,.18);
+      background:
+        linear-gradient(135deg, rgba(17,24,39,.94), rgba(15,23,42,.84)),
+        radial-gradient(circle at right, rgba(34,197,94,.18), transparent 35%);
+      border-radius:26px;
+      padding:24px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+
+    .hero::after{
+      content:"";
+      position:absolute;
+      right:-50px;
+      top:-50px;
+      width:190px;
+      height:190px;
+      border-radius:50%;
+      background:rgba(34,197,94,.12);
+      filter:blur(2px);
+    }
+
+    .hero-content{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:center;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .logo{
+      width:54px;
+      height:54px;
+      border-radius:18px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#06111f;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:28px;
+      font-weight:900;
+      box-shadow:0 12px 30px rgba(34,197,94,.25);
+      flex:0 0 auto;
+    }
+
+    h1{font-size:30px;margin:0 0 7px;color:var(--title);letter-spacing:-.5px}
+    .subtitle{color:var(--muted);font-size:14px;line-height:1.45;max-width:760px}
+
+    .author{
+      text-align:right;
+      border:1px solid rgba(34,197,94,.32);
+      color:#bbf7d0;
+      background:rgba(34,197,94,.08);
+      padding:12px 14px;
+      border-radius:18px;
+      font-size:13px;
+      min-width:210px;
+    }
+
+    .author b{
+      display:block;
+      color:#dcfce7;
+      font-size:15px;
+      margin-top:3px;
+    }
+
+    .quick-guide{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:18px;
+    }
+
+    .mobile-guide{
+      display:none;
+      margin-bottom:12px;
+      padding:12px;
+      border-radius:16px;
+      border:1px solid rgba(56,189,248,.20);
+      background:rgba(56,189,248,.08);
+      color:#dff6ff;
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .mobile-guide b{color:#f8fafc}
+
+    .capture-flow{
+      display:grid;
+      grid-template-columns:repeat(5, 1fr);
+      gap:8px;
+      margin-bottom:16px;
+    }
+
+    .flow-step{
+      border:1px solid rgba(56,189,248,.18);
+      background:rgba(15,23,42,.55);
+      border-radius:14px;
+      padding:10px;
+      color:#cbd5e1;
+      font-size:12px;
+      line-height:1.25;
+      min-height:48px;
+    }
+
+    .flow-step span{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:22px;
+      height:22px;
+      border-radius:8px;
+      background:rgba(34,197,94,.16);
+      color:#bbf7d0;
+      font-weight:900;
+      margin-right:5px;
+    }
+
+    .guide-box{
+      padding:14px;
+      border-radius:18px;
+      background:rgba(15,23,42,.70);
+      border:1px solid rgba(148,163,184,.16);
+      line-height:1.45;
+      color:#dbeafe;
+      font-size:13px;
+    }
+
+    .guide-box b{color:#f8fafc}
+
+    .grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+    }
+
+    .card{
+      background:rgba(17,24,39,.92);
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:22px;
+      padding:20px;
+      box-shadow:0 18px 50px rgba(0,0,0,.28);
+      backdrop-filter:blur(8px);
+    }
+
+    .card h2{
+      font-size:18px;
+      margin:0 0 16px;
+      color:#f8fafc;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .section-icon{
+      width:28px;
+      height:28px;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(56,189,248,.12);
+      border:1px solid rgba(56,189,248,.24);
+      font-size:15px;
+      flex:0 0 auto;
+    }
+
+    label{display:block;color:#cbd5e1;font-size:13px;margin-bottom:6px}
+
+    input, select{
+      width:100%;
+      background:var(--input);
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:12px 12px;
+      outline:none;
+      font-size:16px;
+      min-height:48px;
+      transition:border-color .2s, box-shadow .2s;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+
+    select{
+      padding-right:34px;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #94a3b8 50%),
+        linear-gradient(135deg, #94a3b8 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 52%,
+        calc(100% - 12px) 52%;
+      background-size:6px 6px, 6px 6px;
+      background-repeat:no-repeat;
+      white-space:normal;
+      text-overflow:ellipsis;
+    }
+
+    input:focus, select:focus{
+      border-color:var(--accent2);
+      box-shadow:0 0 0 4px rgba(56,189,248,.10);
+    }
+
+    input[readonly]{opacity:.9;background:rgba(15,23,42,.78)}
+
+    .form-section{
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(15,23,42,.34);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:14px;
+    }
+
+    .form-section.important{
+      border-color:rgba(34,197,94,.25);
+      background:linear-gradient(135deg, rgba(34,197,94,.08), rgba(15,23,42,.34));
+    }
+
+    .form-section-title{
+      color:#bae6fd;
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:12px;
+      display:flex;
+      align-items:center;
+      gap:7px;
+    }
+
+    .helper-text{
+      color:#94a3b8;
+      font-size:12px;
+      line-height:1.4;
+      margin-top:-4px;
+      margin-bottom:12px;
+    }
+
+    .required{
+      color:#86efac;
+      font-size:11px;
+      font-weight:800;
+      margin-left:5px;
+    }
+
+    .calc-note{
+      margin-top:12px;
+      border:1px solid rgba(148,163,184,.14);
+      background:rgba(15,23,42,.48);
+      border-radius:14px;
+      padding:12px;
+      color:#cbd5e1;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .calc-note b{color:#f8fafc}
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .row3{
+      display:grid;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:12px;
+      margin-bottom:12px;
+    }
+
+    .hidden{display:none !important;}
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .main-actions{
+      position:relative;
+    }
+
+    button{
+      border:0;
+      border-radius:14px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:bold;
+      color:#04130a;
+      background:linear-gradient(135deg,var(--accent),#86efac);
+      font-size:15px;
+      min-height:48px;
+      box-shadow:0 10px 22px rgba(34,197,94,.18);
+      transition:transform .12s, filter .12s;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    button:hover{filter:brightness(1.05);transform:translateY(-1px)}
+    button:active{transform:translateY(0)}
+
+    button.secondary{
+      background:#1e293b;
+      color:#dbeafe;
+      border:1px solid #334155;
+      box-shadow:none;
+    }
+
+    button.warn{
+      background:#334155;
+      color:#fde68a;
+      border:1px solid #64748b;
+      box-shadow:none;
+    }
+
+    button.danger{
+      background:#3f1d2a;
+      color:#fecdd3;
+      border:1px solid #9f1239;
+      box-shadow:none;
+    }
+
+    button.small-btn{
+      min-height:34px;
+      padding:7px 10px;
+      font-size:12px;
+      border-radius:10px;
+    }
+
+    .results{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+
+    .metric{
+      border:1px solid var(--line);
+      background:linear-gradient(135deg, rgba(15,23,42,.84), rgba(30,41,59,.56));
+      border-radius:18px;
+      padding:15px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .metric::after{
+      content:"";
+      position:absolute;
+      right:-20px;
+      bottom:-20px;
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      background:rgba(56,189,248,.06);
+    }
+
+    .metric .name{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:7px;
+      position:relative;
+      z-index:1;
+    }
+
+    .metric .value{
+      font-size:27px;
+      font-weight:900;
+      color:#f8fafc;
+      position:relative;
+      z-index:1;
+      letter-spacing:-.5px;
+    }
+
+    .metric .small{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.35;
+      position:relative;
+      z-index:1;
+    }
+
+    .status{
+      margin-top:14px;
+      padding:15px;
+      border-radius:18px;
+      background:linear-gradient(135deg, rgba(56,189,248,.10), rgba(34,197,94,.08));
+      border:1px solid rgba(56,189,248,.25);
+      color:#dff6ff;
+      line-height:1.5;
+    }
+
+    .toast-container{
+      position:fixed;
+      left:50%;
+      bottom:calc(18px + env(safe-area-inset-bottom));
+      transform:translateX(-50%);
+      z-index:99999;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+      width:min(92vw, 420px);
+      pointer-events:none;
+      -webkit-transform:translateX(-50%) translateZ(0);
+      transform:translateX(-50%) translateZ(0);
+    }
+
+    .toast{
+      width:100%;
+      opacity:0;
+      transform:translateY(14px);
+      border-radius:16px;
+      padding:13px 14px;
+      border:1px solid rgba(148,163,184,.22);
+      background:rgba(15,23,42,.98);
+      color:#e5e7eb;
+      box-shadow:0 18px 45px rgba(0,0,0,.35);
+      font-size:13px;
+      line-height:1.35;
+      transition:opacity .22s ease, transform .22s ease;
+      pointer-events:auto;
+      -webkit-backdrop-filter:blur(8px);
+      backdrop-filter:blur(8px);
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .toast-ok{
+      border-color:rgba(34,197,94,.40);
+      background:linear-gradient(135deg, rgba(22,101,52,.96), rgba(15,23,42,.96));
+      color:#dcfce7;
+    }
+
+    .toast-warn{
+      border-color:rgba(250,204,21,.42);
+      background:linear-gradient(135deg, rgba(113,63,18,.96), rgba(15,23,42,.96));
+      color:#fef3c7;
+    }
+
+    .toast-error{
+      border-color:rgba(251,113,133,.45);
+      background:linear-gradient(135deg, rgba(127,29,29,.96), rgba(15,23,42,.96));
+      color:#fee2e2;
+    }
+
+
+    .semaforo{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-top:14px;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(15,23,42,.62);
+      border:1px solid rgba(148,163,184,.16);
+    }
+
+    .semaforo-icon{
+      width:48px;
+      height:48px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:26px;
+      background:rgba(148,163,184,.12);
+      flex:0 0 auto;
+    }
+
+    .semaforo-title{font-weight:900;color:#f8fafc;margin-bottom:3px}
+    .semaforo-text{font-size:13px;color:#cbd5e1;line-height:1.4}
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:12px;
+      margin-top:10px;
+    }
+
+    .summary-box{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:13px;
+      background:rgba(15,23,42,.62);
+    }
+
+    .summary-box .name{font-size:12px;color:var(--muted)}
+    .summary-box .value{font-size:21px;font-weight:900;margin-top:5px;color:#f8fafc}
+
+    .chart-wrap{
+      margin-top:14px;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(15,23,42,.55);
+    }
+
+    canvas{
+      width:100%;
+      height:210px;
+      display:block;
+      background:rgba(2,6,23,.20);
+      border-radius:14px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      margin-top:12px;
+      font-size:13px;
+      overflow:hidden;
+      border-radius:16px;
+      border:1px solid var(--line);
+    }
+
+    th,td{
+      border-bottom:1px solid var(--line);
+      padding:11px 9px;
+      text-align:left;
+      vertical-align:top;
+      white-space:nowrap;
+    }
+
+    th{
+      color:#bae6fd;
+      background:rgba(56,189,248,.10);
+      font-weight:800;
+    }
+
+    td{color:#e2e8f0;background:rgba(15,23,42,.34)}
+    tr:last-child td{border-bottom:0}
+
+    .history-wrap{overflow:auto;max-height:360px}
+
+    .note{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+      margin-top:12px;
+      border-left:3px solid rgba(34,197,94,.45);
+      padding-left:10px;
+    }
+
+    .iphone-tip{
+      margin-top:18px;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(56,189,248,.08);
+      border:1px solid rgba(56,189,248,.20);
+      color:#dff6ff;
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    .iphone-tip b{color:#bae6fd}
+
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:#cbd5e1;
+      font-size:13px;
+      padding:14px;
+      border-radius:18px;
+      background:rgba(15,23,42,.45);
+      border:1px solid rgba(148,163,184,.12);
+    }
+
+    .footer b{color:#bbf7d0}
+
+    .field-error{
+      margin-top:6px;
+      color:#fecdd3;
+      font-size:12px;
+      line-height:1.35;
+      display:none;
+    }
+
+    input.input-error{
+      border-color:#fb7185 !important;
+      box-shadow:0 0 0 4px rgba(251,113,133,.12) !important;
+    }
+
+    .good{color:#86efac}
+    .mid{color:#fde68a}
+    .bad{color:#fda4af}
+
+    @media(max-width:900px){
+      .toast-container{
+        left:50%;
+        right:auto;
+        bottom:calc(12px + env(safe-area-inset-bottom));
+        width:calc(100vw - 20px);
+        max-width:none;
+      }
+
+      body{padding:10px}
+      .hero{padding:14px;border-radius:20px;margin-bottom:10px}
+      .hero-content{display:block}
+      .brand{align-items:flex-start}
+      h1{font-size:21px;line-height:1.15}
+      .subtitle{font-size:12px}
+      .author{text-align:left;margin-top:10px;min-width:0;padding:8px 10px}
+      .quick-guide{display:none}
+      .mobile-guide{display:block}
+      .grid{grid-template-columns:1fr;gap:12px}
+      .card{padding:14px;border-radius:18px}
+      .card h2{font-size:17px;margin-bottom:12px}
+      .capture-flow{display:none}
+      .form-section{
+        padding:11px;
+        margin-bottom:10px;
+        border-radius:15px;
+      }
+      .form-section-title{
+        font-size:12px;
+        margin-bottom:8px;
+      }
+      .form-section .row{
+        grid-template-columns:1fr;
+        gap:8px;
+        margin-bottom:8px;
+      }
+      .row3{grid-template-columns:1fr}
+      label{font-size:12px;margin-bottom:5px}
+      input, select{
+        min-height:46px;
+        padding:10px 34px 10px 10px;
+        border-radius:12px;
+        font-size:16px;
+      }
+      input{padding-right:10px}
+      .helper-text{font-size:11px;margin-bottom:8px}
+      .note{font-size:11px;margin-top:8px;padding-left:8px}
+      .actions{gap:8px}
+      .main-actions{
+        position:static;
+        margin:12px 0 0 0;
+        padding:0;
+        background:none;
+        border-top:0;
+        backdrop-filter:none;
+      }
+      .main-actions button{
+        flex:1 1 30%;
+        padding:10px 11px;
+        min-height:44px;
+        font-size:14px;
+      }
+      .vehicle-card .actions button,
+      .history-card .actions button{
+        flex:1 1 auto;
+      }
+      .results{grid-template-columns:1fr 1fr;gap:8px}
+      .metric{padding:11px;border-radius:15px}
+      .metric .name{font-size:12px}
+      .metric .value{font-size:20px}
+      .metric .small{font-size:10px}
+      .summary-grid{grid-template-columns:1fr 1fr;gap:8px}
+      .summary-box{padding:10px;border-radius:15px}
+      .summary-box .name{font-size:11px}
+      .summary-box .value{font-size:17px}
+      .semaforo{padding:10px;border-radius:15px}
+      .semaforo-icon{width:42px;height:42px;border-radius:14px}
+      .calc-note{font-size:11px;padding:10px}
+      canvas{height:180px}
+      th,td{white-space:normal;font-size:12px;padding:9px 7px}
+    }
+
+    @media(max-width:520px){
+      .summary-grid{grid-template-columns:1fr 1fr}
+      .metric .value{font-size:19px}
+      .brand{gap:10px}
+      .logo{width:46px;height:46px}
+      .form-section .row,
+      #bloqueOdometro.row,
+      #bloqueTrip.row{
+        grid-template-columns:1fr;
+      }
+      .main-actions button{
+        font-size:13px;
+        padding-left:8px;
+        padding-right:8px;
+      }
+    }
+
+    @media(max-width:380px){
+      .results{grid-template-columns:1fr}
+      .summary-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-content">
+        <div class="brand">
+          <div class="logo">⛽</div>
+          <div>
+            <h1>Control de rendimiento de combustible</h1>
+            <div class="subtitle">
+              Controla varios vehículos, calcula por Método, guarda historial separado, revisa gráficas, exporta Excel y respalda tus datos.
+            </div>
+          </div>
+        </div>
+        <div class="author">
+          Elaborado por
+          <b>Cristian Larios</b>
+        </div>
+      </div>
+    </section>
+
+    <div class="quick-guide">
+      <div class="guide-box">
+        <b>¿Tu vehículo tiene Trip?</b><br>
+        Usa <b>“Tengo Trip y lo reinicié a 0 al cargar”</b>. Captura los km que marque el Trip después de manejar.
+      </div>
+      <div class="guide-box">
+        <b>¿No tiene Trip o no lo puedes reiniciar?</b><br>
+        Usa <b>“No tengo Trip: usar km actuales”</b>. Captura km inicial y km final del odómetro principal.
+      </div>
+    </div>
+
+    <div class="mobile-guide">
+      <b>Guía rápida:</b> usa <b>Trip</b> si lo reiniciaste a 0. Usa <b>Odómetro</b> si solo tienes los km actuales del vehículo.
+    </div>
+
+    <div class="grid">
+      <section class="card vehicle-card">
+        <h2><span class="section-icon">🚗</span>Vehículo</h2>
+
+        <div class="row">
+          <div>
+            <label>Selecciona vehículo</label>
+            <select id="vehiculoSelect" onchange="seleccionarVehiculo()"></select>
+          </div>
+          <div>
+            <label>Nuevo vehículo</label>
+            <input id="vehiculoNuevo" type="text" placeholder="Ej. Auto, camioneta">
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" onclick="agregarVehiculo()">Agregar vehículo</button>
+          <button type="button" class="danger" onclick="eliminarVehiculoActual()">Eliminar vehículo</button>
+        </div>
+
+        <div class="note">
+          Cada vehículo tiene su historial separado. Esto evita mezclar rendimientos de autos diferentes.
+        </div>
+      </section>
+
+      <section class="card summary-card">
+        <h2><span class="section-icon">📌</span>Resumen del vehículo</h2>
+
+        <div class="summary-grid">
+          <div class="summary-box">
+            <div class="name">Rendimiento acum.</div>
+            <div class="value" id="promedioHist">-- km/L</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Mejor</div>
+            <div class="value" id="mejorHist">-- km/L</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Peor</div>
+            <div class="value" id="peorHist">-- km/L</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Registros</div>
+            <div class="value" id="totalHist">0</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Km totales</div>
+            <div class="value" id="kmTotales">--</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Gasto total</div>
+            <div class="value" id="gastoTotal">--</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Litros totales</div>
+            <div class="value" id="litrosTotales">--</div>
+          </div>
+          <div class="summary-box">
+            <div class="name">Costo promedio/km</div>
+            <div class="value" id="costoPromKm">--</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid" style="margin-top:18px">
+      <section class="card data-card">
+        <h2><span class="section-icon">📝</span>Datos de la carga</h2>
+
+        <div class="capture-flow">
+          <div class="flow-step"><span>1</span>Fecha</div>
+          <div class="flow-step"><span>2</span>Combustible</div>
+          <div class="flow-step"><span>3</span>Método</div>
+          <div class="flow-step"><span>4</span>Kilómetros</div>
+          <div class="flow-step"><span>5</span>Guardar</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">1. Fecha y manejo</div>
+          <div class="row">
+            <div>
+              <label>Fecha de carga</label>
+              <input id="fecha" type="date">
+            </div>
+            <div>
+              <label>Tipo de manejo</label>
+              <select id="uso">
+                <option value="rural">Rural con topes</option>
+                <option value="ciudad">Ciudad</option>
+                <option value="mixto">Mixto</option>
+                <option value="carretera">Carretera</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section important">
+          <div class="form-section-title">2. Combustible</div>
+          <div class="row">
+            <div>
+              <label>Monto pagado ($)</label>
+              <input id="monto" type="text" inputmode="decimal" placeholder="Ej. 500">
+            </div>
+            <div>
+              <label>Litros cargados <span class="required">OBLIGATORIO</span></label>
+              <input id="litros" type="text" inputmode="decimal" placeholder="Ej. 21.749">
+            </div>
+          </div>
+          <div class="helper-text">Estos datos salen del ticket o de la bomba. En litros puedes capturar 21,749 o 21.749; ambos se toman como 21.749 L.</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">3. Método de kilómetros</div>
+          <div class="row">
+            <div>
+              <label>Método de kilómetros</label>
+              <select id="metodo" onchange="cambiarMetodo()">
+                <option value="trip">Trip reiniciado a 0</option>
+                <option value="odometro">Odómetro: km inicial y final</option>
+              </select>
+            </div>
+            <div>
+              <label>Km calculados</label>
+              <input id="kmCalculados" type="text" readonly placeholder="Se calcula solo">
+            </div>
+          </div>
+
+          <div class="note" id="notaMetodo">
+            <b>Trip reiniciado a 0:</b> úsalo cuando al cargar gasolina reiniciaste el Trip. Después captura los km que marcó el Trip.
+          </div>
+        </div>
+
+        <div class="form-section important">
+          <div class="form-section-title">4. Kilómetros</div>
+
+          <div id="bloqueTrip" class="row">
+            <div>
+              <label>Km recorridos según Trip <span class="required">OBLIGATORIO</span></label>
+              <input id="kmTrip" type="text" inputmode="decimal" placeholder="Ej. 250">
+            </div>
+            <div>
+              <label>Autonomía restante opcional</label>
+              <input id="range" type="text" inputmode="decimal" placeholder="Ej. 80">
+            </div>
+          </div>
+
+          <div id="bloqueOdometro" class="row hidden">
+            <div>
+              <label>Km inicial al cargar <span class="required">OBLIGATORIO</span></label>
+              <input id="kmInicial" type="text" inputmode="decimal" placeholder="Ej. 80000">
+            </div>
+            <div>
+              <label>Km final / actual <span class="required">OBLIGATORIO</span></label>
+              <input id="kmFinal" type="text" inputmode="decimal" placeholder="Ej. 80250">
+            </div>
+          </div>
+
+          <div class="helper-text">En odómetro, la app calcula automáticamente: <b>km final - km inicial</b>. Puedes escribir 80000 o 80,000.</div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">5. Automático</div>
+          <div class="row">
+            <div>
+              <label>Precio por litro</label>
+              <input id="precioLitro" type="text" readonly placeholder="Se calcula solo">
+            </div>
+            <div>
+              <label>Último km final</label>
+              <input id="ultimoKmFinal" type="text" readonly placeholder="Sin registro">
+            </div>
+          </div>
+        </div>
+
+        <div class="actions main-actions">
+          <button type="button" onclick="calcular()">Calcular</button>
+          <button type="button" class="secondary" onclick="guardar()">Guardar</button>
+          <button type="button" class="warn" onclick="limpiar()">Limpiar</button>
+        </div>
+      </section>
+
+      <section class="card result-card">
+        <h2><span class="section-icon">📊</span>Resultados</h2>
+
+        <div class="results">
+          <div class="metric">
+            <div class="name">Rendimiento</div>
+            <div class="value" id="kmL">-- km/L</div>
+            <div class="small">Kilómetros recorridos por cada litro</div>
+          </div>
+
+          <div class="metric">
+            <div class="name">Consumo</div>
+            <div class="value" id="l100">-- L/100 km</div>
+            <div class="small">Entre más bajo, mejor</div>
+          </div>
+
+          <div class="metric">
+            <div class="name">Costo por km</div>
+            <div class="value" id="costoKm">--</div>
+            <div class="small">Cuánto te cuesta avanzar 1 km</div>
+          </div>
+
+          <div class="metric">
+            <div class="name">Costo por 100 km</div>
+            <div class="value" id="costo100">--</div>
+            <div class="small">Estimación con tu carga</div>
+          </div>
+
+          <div class="metric">
+            <div class="name">Precio por litro</div>
+            <div class="value" id="precioLitroResultado">--</div>
+            <div class="small">Monto dividido entre litros</div>
+          </div>
+
+          <div class="metric">
+            <div class="name">Total proyectado con autonomía</div>
+            <div class="value" id="proyectado">--</div>
+            <div class="small">Solo aplica si usas Trip y capturas autonomía</div>
+          </div>
+        </div>
+
+        <div class="semaforo" id="semaforo">
+          <div class="semaforo-icon" id="semaforoIcon">⚪</div>
+          <div>
+            <div class="semaforo-title" id="semaforoTitle">Sin evaluación</div>
+            <div class="semaforo-text" id="semaforoText">Captura tus datos y presiona Calcular.</div>
+          </div>
+        </div>
+
+        <div class="status" id="estatus">
+          Captura tus datos y presiona <b>Calcular</b>.
+        </div>
+
+        <div class="calc-note">
+          <b>Fórmulas:</b> km/L = km recorridos ÷ litros. &nbsp;|&nbsp;
+          L/100 km = (litros ÷ km recorridos) × 100. &nbsp;|&nbsp;
+          $/km = monto ÷ km recorridos.
+        </div>
+      </section>
+    </div>
+
+    <section class="card chart-card" style="margin-top:18px">
+      <h2><span class="section-icon">📈</span>Gráfica de rendimiento</h2>
+      <div class="chart-wrap">
+        <canvas id="grafica" width="900" height="260"></canvas>
+      </div>
+      <div class="note">
+        La gráfica muestra los últimos registros guardados del vehículo seleccionado, del más antiguo al más reciente.
+      </div>
+    </section>
+
+    <section class="card history-card" style="margin-top:18px">
+      <h2><span class="section-icon">🗂️</span>Historial guardado</h2>
+
+      <div class="actions">
+        <button type="button" class="secondary" onclick="exportarExcel()">Exportar Excel</button>
+        <button type="button" class="secondary" onclick="exportarCSV()">Exportar CSV</button>
+        <button type="button" class="secondary" onclick="copiarResumen()">Copiar resumen</button>
+        <button type="button" class="secondary" onclick="exportarRespaldo()">Exportar respaldo</button>
+        <button type="button" class="secondary" onclick="abrirImportar()">Importar respaldo</button>
+        <button type="button" class="danger" onclick="borrarHistorialVehiculo()">Borrar historial del vehículo</button>
+      </div>
+
+      <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importarRespaldo(event)">
+
+      <div class="history-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Vehículo</th>
+              <th>Método</th>
+              <th>Manejo</th>
+              <th>Monto</th>
+              <th>Litros</th>
+              <th>Km recorridos</th>
+              <th>Km inicial</th>
+              <th>Km final</th>
+              <th>km/L</th>
+              <th>L/100 km</th>
+              <th>$/km</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="historial"></tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        El historial se guarda en este navegador. Usa <b>Exportar respaldo</b> para guardar todos tus vehículos y registros en un archivo JSON.
+      </div>
+    </section>
+
+    <div class="iphone-tip">
+      <b>Uso recomendado en iPhone:</b> abre esta app en Safari y usa Compartir → Agregar a pantalla de inicio. Así se verá como una app y conservará mejor el historial en el navegador.
+    </div>
+
+    <div class="footer">
+      Aplicación de control personal de combustible · Elaborado por <b>Cristian Larios</b>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+var STORAGE_KEY = "controlCombustibleCristianV15";
+var OLD_STORAGE_KEYS = [
+  "controlCombustibleCristianV14",
+  "controlCombustibleCristianV13",
+  "controlCombustibleCristianV12",
+  "controlCombustibleCristianV10",
+  "rendimientoCombustibleCristianV8",
+  "rendimientoCombustibleCristianV5",
+  "rendimientoCombustibleV4",
+  "rendimientoCombustibleV3",
+  "rendimientoCombustibleV2"
+];
+
+var appData = {
+  version: 15,
+  selectedVehicleId: "",
+  vehicles: [],
+  records: []
+};
+
+var SUPABASE_URL = "https://zlqguugrvjpqcahwqtim.supabase.co";
+var SUPABASE_PUBLISHABLE_KEY = "sb_publishable_m1uqyd4GZMBM4vTji-FaTg_MQ-CqE4d";
+
+var supabaseClient = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false
+      }
+    })
+  : null;
+
+var usuarioSupabase = null;
+var supabaseListo = false;
+var supabaseSaveTimer = null;
+var cargandoDesdeSupabase = false;
+
+function el(id){ return document.getElementById(id); }
+
+function crearId(prefix){
+  return prefix + "_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2,8);
+}
+
+function hoy(){
+  var d = new Date();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return d.getFullYear() + "-" + m + "-" + day;
+}
+
+function escapeHtml(str){
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function prepararNumero(valor){
+  if(valor === null || valor === undefined) return "";
+  return String(valor).trim().replace(/\s/g, "").replace(/\$/g, "");
+}
+
+function parseDecimalFlexible(valor){
+  var s = prepararNumero(valor);
+  if(!s) return 0;
+
+  var commaCount = (s.match(/,/g) || []).length;
+  var dotCount = (s.match(/\./g) || []).length;
+  var lastComma = s.lastIndexOf(",");
+  var lastDot = s.lastIndexOf(".");
+
+  if(commaCount > 0 && dotCount > 0){
+    var lastSep = Math.max(lastComma, lastDot);
+    var intPart = s.slice(0, lastSep).replace(/[^\d-]/g, "");
+    var decPart = s.slice(lastSep + 1).replace(/[^\d]/g, "");
+    return Number(intPart + "." + decPart) || 0;
+  }
+
+  if(commaCount === 1 && dotCount === 0){
+    return Number(s.replace(",", ".")) || 0;
+  }
+
+  if(dotCount === 1 && commaCount === 0){
+    return Number(s) || 0;
+  }
+
+  return Number(s.replace(/[^\d-]/g, "")) || 0;
+}
+
+function parseNumeroGeneral(valor){
+  var s = prepararNumero(valor);
+  if(!s) return 0;
+
+  var commaCount = (s.match(/,/g) || []).length;
+  var dotCount = (s.match(/\./g) || []).length;
+  var lastComma = s.lastIndexOf(",");
+  var lastDot = s.lastIndexOf(".");
+
+  // Si trae coma y punto, el último separador se toma como decimal y los anteriores como miles.
+  if(commaCount > 0 && dotCount > 0){
+    var lastSep = Math.max(lastComma, lastDot);
+    var intPart = s.slice(0, lastSep).replace(/[^\d-]/g, "");
+    var decPart = s.slice(lastSep + 1).replace(/[^\d]/g, "");
+    return Number(intPart + "." + decPart) || 0;
+  }
+
+  // Si trae varios separadores iguales, se toman como separadores de miles.
+  if(commaCount > 1 && dotCount === 0){
+    return Number(s.replace(/,/g, "").replace(/[^\d-]/g, "")) || 0;
+  }
+
+  if(dotCount > 1 && commaCount === 0){
+    return Number(s.replace(/\./g, "").replace(/[^\d-]/g, "")) || 0;
+  }
+
+  // Si trae un solo separador con 3 dígitos al final, en montos/km se interpreta como miles:
+  // 80,000 = 80000. Si trae 1 o 2 dígitos al final, se interpreta como decimal: 253,8 = 253.8.
+  if((commaCount === 1 && dotCount === 0) || (dotCount === 1 && commaCount === 0)){
+    var sep = commaCount === 1 ? "," : ".";
+    var parts = s.split(sep);
+    var izquierda = (parts[0] || "").replace(/[^\d-]/g, "");
+    var derecha = (parts[1] || "").replace(/[^\d]/g, "");
+
+    if(derecha.length === 3 && izquierda.length >= 1){
+      return Number(izquierda + derecha) || 0;
+    }
+
+    return Number(izquierda + "." + derecha) || 0;
+  }
+
+  return Number(s.replace(/[^\d-]/g, "")) || 0;
+}
+
+function parseCantidadPorCampo(id, valor){
+  // Litros normalmente se capturan con 3 decimales, por ejemplo 21,749 = 21.749.
+  // Los demás campos interpretan 80,000 como 80000 para evitar errores en odómetro.
+  if(id === "litros"){
+    return parseDecimalFlexible(valor);
+  }
+  return parseNumeroGeneral(valor);
+}
+
+function parseCantidad(valor){
+  return parseDecimalFlexible(valor);
+}
+
+function fmtNum(value, maxDecimals){
+  if(!isFinite(value)) return "--";
+  return Number(value).toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: maxDecimals
+  });
+}
+
+function money(value){
+  if(!isFinite(value)) return "--";
+  return "$" + Number(value).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function n(id){
+  return parseCantidadPorCampo(id, el(id).value);
+}
+
+function normalizarCampo(id, maxDecimals){
+  var campo = el(id);
+  if(!campo || !campo.value.trim()) return;
+  var value = parseCantidadPorCampo(id, campo.value);
+  if(value <= 0 && campo.value.trim() !== "0") return;
+  campo.value = fmtNum(value, maxDecimals);
+}
+
+function limpiarErrores(){
+  var campos = ["monto","litros","kmTrip","range","kmInicial","kmFinal"];
+  for(var i=0; i<campos.length; i++){
+    var campo = el(campos[i]);
+    if(campo){
+      campo.classList.remove("input-error");
+      var err = el(campos[i] + "_error");
+      if(err){
+        err.textContent = "";
+        err.style.display = "none";
+      }
+    }
+  }
+}
+
+function mostrarErrorCampo(id, mensaje){
+  var campo = el(id);
+  if(!campo) return;
+
+  campo.classList.add("input-error");
+
+  var err = el(id + "_error");
+  if(!err){
+    err = document.createElement("div");
+    err.id = id + "_error";
+    err.className = "field-error";
+    campo.parentNode.appendChild(err);
+  }
+
+  err.textContent = mensaje;
+  err.style.display = "block";
+}
+
+function validarNumeroCampo(id, nombre, requerido){
+  var campo = el(id);
+  var raw = campo ? campo.value.trim() : "";
+
+  if(raw === ""){
+    if(requerido){
+      mostrarErrorCampo(id, nombre + " es obligatorio.");
+      return {ok:false, value:0};
+    }
+    return {ok:true, value:0};
+  }
+
+  if(/[a-zA-ZñÑáéíóúÁÉÍÓÚ]/.test(raw)){
+    mostrarErrorCampo(id, nombre + " solo debe contener números.");
+    return {ok:false, value:0};
+  }
+
+  if(/[^0-9.,\s$]/.test(raw)){
+    mostrarErrorCampo(id, nombre + " contiene caracteres no válidos.");
+    return {ok:false, value:0};
+  }
+
+  var value = parseCantidadPorCampo(id, raw);
+
+  if(!isFinite(value) || isNaN(value)){
+    mostrarErrorCampo(id, nombre + " no es un número válido.");
+    return {ok:false, value:0};
+  }
+
+  if(value < 0){
+    mostrarErrorCampo(id, nombre + " no puede ser negativo.");
+    return {ok:false, value:0};
+  }
+
+  if(requerido && value <= 0){
+    mostrarErrorCampo(id, nombre + " debe ser mayor a 0.");
+    return {ok:false, value:0};
+  }
+
+  return {ok:true, value:value};
+}
+
+function sanitizarNumeroInput(campo){
+  var original = campo.value;
+  var limpio = original.replace(/[^\d.,]/g, "");
+
+  var puntos = (limpio.match(/\./g) || []).length;
+  var comas = (limpio.match(/,/g) || []).length;
+
+  if(puntos > 1 && comas === 0){
+    var primera = limpio.indexOf(".");
+    limpio = limpio.slice(0, primera + 1) + limpio.slice(primera + 1).replace(/\./g, "");
+  }
+
+  if(comas > 1 && puntos === 0){
+    var primeraComa = limpio.indexOf(",");
+    limpio = limpio.slice(0, primeraComa + 1) + limpio.slice(primeraComa + 1).replace(/,/g, "");
+  }
+
+  if(original !== limpio){
+    campo.value = limpio;
+  }
+}
+
+function guardarLocalStorageSolo(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+function guardarStorage(){
+  var ok = guardarLocalStorageSolo();
+  guardarSupabaseEnSegundoPlano();
+  return ok;
+}
+
+function cargarStorage(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      var parsed = JSON.parse(raw);
+      if(parsed && Array.isArray(parsed.vehicles) && Array.isArray(parsed.records)){
+        appData = parsed;
+      }
+    }else{
+      migrarDatosAnteriores();
+    }
+  }catch(e){
+    appData = {version:15, selectedVehicleId:"", vehicles:[], records:[]};
+  }
+
+  asegurarVehiculoBase();
+}
+
+function actualizarSync(texto){
+  console.log("Sync:", texto);
+}
+
+function mostrarMensaje(texto, tipo){
+  var contenedor = el("toastContainer");
+
+  if(!contenedor){
+    console.log(texto);
+    return;
+  }
+
+  while(contenedor.firstChild){
+    contenedor.removeChild(contenedor.firstChild);
+  }
+
+  var mensaje = document.createElement("div");
+  mensaje.className = "toast toast-" + (tipo || "info");
+  mensaje.textContent = texto;
+
+  contenedor.appendChild(mensaje);
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      mensaje.classList.add("show");
+    });
+  });
+
+  setTimeout(function(){
+    mensaje.classList.remove("show");
+    setTimeout(function(){
+      if(mensaje && mensaje.parentNode){
+        mensaje.parentNode.removeChild(mensaje);
+      }
+    }, 260);
+  }, 3200);
+}
+
+function clonarAppData(data){
+  try{
+    return JSON.parse(JSON.stringify(data));
+  }catch(e){
+    return {version:15, selectedVehicleId:"", vehicles:[], records:[]};
+  }
+}
+
+function appDataValido(data){
+  return data && Array.isArray(data.vehicles) && Array.isArray(data.records);
+}
+
+function combinarDatosApp(datosNube, datosLocales){
+  var combinado = {
+    version: 15,
+    selectedVehicleId: "",
+    vehicles: [],
+    records: []
+  };
+
+  var vehiculosPorId = {};
+  var registrosPorId = {};
+
+  function agregarVehiculos(lista){
+    if(!Array.isArray(lista)) return;
+
+    for(var i=0; i<lista.length; i++){
+      var v = lista[i];
+      if(!v || !v.id) continue;
+
+      if(!vehiculosPorId[v.id]){
+        vehiculosPorId[v.id] = true;
+        combinado.vehicles.push(clonarAppData(v));
+      }
+    }
+  }
+
+  function agregarRegistros(lista){
+    if(!Array.isArray(lista)) return;
+
+    for(var i=0; i<lista.length; i++){
+      var r = lista[i];
+      if(!r) continue;
+
+      if(!r.id){
+        r.id = crearId("rec");
+      }
+
+      if(!registrosPorId[r.id]){
+        registrosPorId[r.id] = true;
+        combinado.records.push(clonarAppData(r));
+      }
+    }
+  }
+
+  // Primero nube y después local para no perder capturas que se hayan quedado solo en el navegador.
+  if(appDataValido(datosNube)){
+    agregarVehiculos(datosNube.vehicles);
+    agregarRegistros(datosNube.records);
+  }
+
+  if(appDataValido(datosLocales)){
+    agregarVehiculos(datosLocales.vehicles);
+    agregarRegistros(datosLocales.records);
+  }
+
+  // Mantener registros recientes arriba como en el historial original.
+  combinado.records.sort(function(a,b){
+    var da = new Date(a.creado || a.fecha || 0).getTime();
+    var db = new Date(b.creado || b.fecha || 0).getTime();
+    return db - da;
+  });
+
+  var seleccionadoLocal = datosLocales && datosLocales.selectedVehicleId ? datosLocales.selectedVehicleId : "";
+  var seleccionadoNube = datosNube && datosNube.selectedVehicleId ? datosNube.selectedVehicleId : "";
+
+  if(seleccionadoLocal && existeVehiculoEnLista(combinado.vehicles, seleccionadoLocal)){
+    combinado.selectedVehicleId = seleccionadoLocal;
+  }else if(seleccionadoNube && existeVehiculoEnLista(combinado.vehicles, seleccionadoNube)){
+    combinado.selectedVehicleId = seleccionadoNube;
+  }else if(combinado.vehicles.length > 0){
+    combinado.selectedVehicleId = combinado.vehicles[0].id;
+  }
+
+  return combinado;
+}
+
+function existeVehiculoEnLista(lista, id){
+  if(!Array.isArray(lista)) return false;
+
+  for(var i=0; i<lista.length; i++){
+    if(lista[i] && lista[i].id === id) return true;
+  }
+
+  return false;
+}
+
+async function iniciarSupabase(){
+  if(!supabaseClient){
+    actualizarSync("solo local. No cargó la librería de Supabase.");
+    return false;
+  }
+
+  try{
+    var sessionResp = await supabaseClient.auth.getSession();
+    var session = sessionResp && sessionResp.data ? sessionResp.data.session : null;
+
+    if(session && session.user){
+      usuarioSupabase = session.user;
+    }else{
+      var anonResp = await supabaseClient.auth.signInAnonymously();
+
+      if(anonResp.error){
+        throw anonResp.error;
+      }
+
+      usuarioSupabase = anonResp.data.user || (anonResp.data.session ? anonResp.data.session.user : null);
+    }
+
+    if(!usuarioSupabase){
+      throw new Error("No se pudo obtener usuario anónimo.");
+    }
+
+    supabaseListo = true;
+    actualizarSync("conectado a la nube.");
+    return true;
+  }catch(e){
+    console.error("Error al iniciar Supabase:", e);
+    actualizarSync("solo local. Revisa que Anonymous Sign-Ins esté activado.");
+    return false;
+  }
+}
+
+async function cargarDatosSupabase(datosLocalesAntesDeNube){
+  if(!supabaseClient || !usuarioSupabase) return;
+
+  try{
+    cargandoDesdeSupabase = true;
+
+    var resp = await supabaseClient
+      .from("combustible_app_data")
+      .select("data")
+      .eq("user_id", usuarioSupabase.id)
+      .maybeSingle();
+
+    if(resp.error){
+      throw resp.error;
+    }
+
+    if(resp.data && appDataValido(resp.data.data)){
+      appData = combinarDatosApp(resp.data.data, datosLocalesAntesDeNube);
+      asegurarVehiculoBase();
+      guardarLocalStorageSolo();
+      await guardarSupabase(true);
+      actualizarSync("datos combinados y sincronizados con Supabase.");
+    }else{
+      appData = appDataValido(datosLocalesAntesDeNube) ? datosLocalesAntesDeNube : appData;
+      asegurarVehiculoBase();
+      guardarLocalStorageSolo();
+      await guardarSupabase(true);
+      actualizarSync("primer respaldo creado en Supabase.");
+    }
+  }catch(e){
+    console.error("Error al cargar desde Supabase:", e);
+    actualizarSync("guardando local. No se pudo cargar desde Supabase.");
+  }finally{
+    cargandoDesdeSupabase = false;
+  }
+}
+
+function guardarSupabaseEnSegundoPlano(){
+  if(cargandoDesdeSupabase || !supabaseListo || !usuarioSupabase || !supabaseClient) return;
+
+  clearTimeout(supabaseSaveTimer);
+  supabaseSaveTimer = setTimeout(function(){
+    guardarSupabase();
+  }, 700);
+}
+
+async function guardarSupabase(silencioso){
+  if(!supabaseClient || !usuarioSupabase) return false;
+
+  try{
+    var payload = JSON.parse(JSON.stringify(appData));
+
+    var resp = await supabaseClient
+      .from("combustible_app_data")
+      .upsert({
+        user_id: usuarioSupabase.id,
+        data: payload,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: "user_id"
+      });
+
+    if(resp.error){
+      throw resp.error;
+    }
+
+    actualizarSync("guardado en Supabase.");
+    if(!silencioso){
+    }
+    return true;
+  }catch(e){
+    console.error("Error al guardar en Supabase:", e);
+    actualizarSync("guardado local. Falló el guardado en Supabase.");
+    if(!silencioso){
+      mostrarMensaje("Se guardó en este dispositivo. No se pudo sincronizar en la nube.", "warn");
+    }
+    return false;
+  }
+}
+
+function migrarDatosAnteriores(){
+  for(var i=0; i<OLD_STORAGE_KEYS.length; i++){
+    var raw = localStorage.getItem(OLD_STORAGE_KEYS[i]);
+    if(!raw) continue;
+
+    try{
+      var old = JSON.parse(raw);
+
+      // Migración desde versiones completas anteriores con catálogo de vehículos.
+      if(old && Array.isArray(old.vehicles) && Array.isArray(old.records)){
+        appData = {
+          version: 15,
+          selectedVehicleId: old.selectedVehicleId || "",
+          vehicles: old.vehicles,
+          records: old.records
+        };
+        guardarStorage();
+        return;
+      }
+
+      // Migración desde versiones antiguas que solo tenían arreglo de registros.
+      if(Array.isArray(old)){
+        var vehicleId = crearId("vehiculo");
+        appData.vehicles.push({id:vehicleId, name:"Mi vehículo", created:new Date().toISOString()});
+        appData.selectedVehicleId = vehicleId;
+
+        for(var j=0; j<old.length; j++){
+          var r = old[j];
+          appData.records.push({
+            id: crearId("rec"),
+            vehicleId: vehicleId,
+            fecha: r.fecha || hoy(),
+            vehiculo: r.vehiculo || "Mi vehículo",
+            metodo: r.metodo || "Trip reiniciado a 0",
+            metodoValor: r.metodoValor || "trip",
+            uso: r.uso || "",
+            usoValor: r.usoValor || "",
+            monto: Number(r.monto || 0),
+            litros: Number(r.litros || 0),
+            km: Number(r.km || 0),
+            kmInicial: Number(r.kmInicial || 0),
+            kmFinal: Number(r.kmFinal || 0),
+            range: Number(r.range || 0),
+            kmL: Number(r.kmL || 0),
+            l100: Number(r.l100 || 0),
+            costoKm: Number(r.costoKm || 0),
+            costo100: Number(r.costo100 || 0),
+            precioLitro: Number(r.precioLitro || 0),
+            creado: r.creado || new Date().toISOString()
+          });
+        }
+
+        guardarStorage();
+        return;
+      }
+    }catch(e){}
+  }
+}
+
+function asegurarVehiculoBase(){
+  if(!Array.isArray(appData.vehicles)) appData.vehicles = [];
+  if(!Array.isArray(appData.records)) appData.records = [];
+
+  if(appData.vehicles.length === 0){
+    var id = crearId("vehiculo");
+    appData.vehicles.push({id:id, name:"Mi vehículo", created:new Date().toISOString()});
+    appData.selectedVehicleId = id;
+  }
+
+  if(!appData.selectedVehicleId || !existeVehiculo(appData.selectedVehicleId)){
+    appData.selectedVehicleId = appData.vehicles[0].id;
+  }
+}
+
+function existeVehiculo(id){
+  for(var i=0; i<appData.vehicles.length; i++){
+    if(appData.vehicles[i].id === id) return true;
+  }
+  return false;
+}
+
+function vehiculoActual(){
+  for(var i=0; i<appData.vehicles.length; i++){
+    if(appData.vehicles[i].id === appData.selectedVehicleId) return appData.vehicles[i];
+  }
+  return appData.vehicles[0];
+}
+
+function registrosVehiculoActual(){
+  var id = appData.selectedVehicleId;
+  return appData.records.filter(function(r){ return r.vehicleId === id; });
+}
+
+function registrosOrdenadosVehiculo(){
+  var records = registrosVehiculoActual().slice();
+  records.sort(function(a,b){
+    var da = new Date(a.fecha || a.creado || 0).getTime();
+    var db = new Date(b.fecha || b.creado || 0).getTime();
+    if(da === db) return String(a.creado || "").localeCompare(String(b.creado || ""));
+    return da - db;
+  });
+  return records;
+}
+
+function renderVehiculos(){
+  var sel = el("vehiculoSelect");
+  sel.innerHTML = "";
+
+  for(var i=0; i<appData.vehicles.length; i++){
+    var v = appData.vehicles[i];
+    var opt = document.createElement("option");
+    opt.value = v.id;
+    opt.textContent = v.name;
+    if(v.id === appData.selectedVehicleId) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function seleccionarVehiculo(){
+  appData.selectedVehicleId = el("vehiculoSelect").value;
+  guardarStorage();
+  sugerirKmInicial(true);
+  limpiarResultados();
+  renderTodo();
+}
+
+function agregarVehiculo(){
+  var nombre = el("vehiculoNuevo").value.trim();
+
+  if(!nombre){
+    alert("Escribe el nombre del vehículo.");
+    return;
+  }
+
+  for(var i=0; i<appData.vehicles.length; i++){
+    if(appData.vehicles[i].name.trim().toLowerCase() === nombre.toLowerCase()){
+      alert("Ese vehículo ya existe.");
+      return;
+    }
+  }
+
+  var id = crearId("vehiculo");
+  appData.vehicles.push({id:id, name:nombre, created:new Date().toISOString()});
+  appData.selectedVehicleId = id;
+  el("vehiculoNuevo").value = "";
+  guardarStorage();
+  limpiar();
+  renderTodo();
+  mostrarMensaje("Vehículo agregado correctamente.", "ok");
+}
+
+function eliminarVehiculoActual(){
+  if(appData.vehicles.length <= 1){
+    alert("Debe existir al menos un vehículo.");
+    return;
+  }
+
+  var v = vehiculoActual();
+  if(!confirm("¿Seguro que quieres eliminar el vehículo '" + v.name + "' y todo su historial?")){
+    return;
+  }
+
+  appData.records = appData.records.filter(function(r){ return r.vehicleId !== v.id; });
+  appData.vehicles = appData.vehicles.filter(function(x){ return x.id !== v.id; });
+  appData.selectedVehicleId = appData.vehicles[0].id;
+  guardarStorage();
+  limpiar();
+  renderTodo();
+  mostrarMensaje("Vehículo eliminado correctamente.", "ok");
+}
+
+function textoManejo(){
+  var select = el("uso");
+  return select.options[select.selectedIndex].text;
+}
+
+function textoMetodo(){
+  return el("metodo").value === "odometro"
+    ? "Odómetro: km inicial y final"
+    : "Trip reiniciado a 0";
+}
+
+function cambiarMetodo(){
+  var metodo = el("metodo").value;
+
+  if(metodo === "odometro"){
+    el("bloqueTrip").classList.add("hidden");
+    el("bloqueOdometro").classList.remove("hidden");
+    el("proyectado").textContent = "--";
+    el("notaMetodo").innerHTML = "<b>Odómetro: km inicial y final:</b> úsalo cuando no tienes Trip o no lo reiniciaste. Captura el km actual cuando cargas como <b>km inicial</b>; en la siguiente carga captura el nuevo km actual como <b>km final</b>.";
+    sugerirKmInicial(false);
+  }else{
+    el("bloqueTrip").classList.remove("hidden");
+    el("bloqueOdometro").classList.add("hidden");
+    el("notaMetodo").innerHTML = "<b>Trip reiniciado a 0:</b> úsalo cuando al cargar gasolina reiniciaste el Trip. Después captura los km que marcó el Trip.";
+  }
+
+  limpiarErrores();
+  limpiarResultados();
+}
+
+function ultimoKmFinalVehiculo(){
+  var registros = registrosVehiculoActual()
+    .filter(function(r){ return r.metodoValor === "odometro" && Number(r.kmFinal || 0) > 0; })
+    .sort(function(a,b){
+      var da = new Date(a.fecha || a.creado || 0).getTime();
+      var db = new Date(b.fecha || b.creado || 0).getTime();
+      return db - da;
+    });
+
+  if(registros.length === 0) return 0;
+  return Number(registros[0].kmFinal || 0);
+}
+
+function sugerirKmInicial(forzar){
+  var ultimo = ultimoKmFinalVehiculo();
+  el("ultimoKmFinal").value = ultimo > 0 ? fmtNum(ultimo, 1) + " km" : "";
+
+  if(el("metodo").value !== "odometro") return;
+  if(!forzar && el("kmInicial").value.trim()) return;
+
+  if(ultimo > 0){
+    el("kmInicial").value = fmtNum(ultimo, 1);
+  }
+}
+
+function obtenerKilometros(){
+  var metodo = el("metodo").value;
+
+  if(metodo === "trip"){
+    var vTrip = validarNumeroCampo("kmTrip", "Los kilómetros del Trip", true);
+    if(!vTrip.ok) return {ok:false};
+    return {
+      ok:true,
+      km:vTrip.value,
+      kmInicial:0,
+      kmFinal:0
+    };
+  }
+
+  var vIni = validarNumeroCampo("kmInicial", "El km inicial del vehículo", true);
+  var vFin = validarNumeroCampo("kmFinal", "El km final del vehículo", true);
+
+  if(!vIni.ok || !vFin.ok) return {ok:false};
+
+  if(vFin.value <= vIni.value){
+    mostrarErrorCampo("kmFinal", "El km final debe ser mayor al km inicial.");
+    return {ok:false};
+  }
+
+  return {
+    ok:true,
+    km:vFin.value - vIni.value,
+    kmInicial:vIni.value,
+    kmFinal:vFin.value
+  };
+}
+
+function calcularValores(){
+  limpiarErrores();
+
+  var vmonto = validarNumeroCampo("monto", "El monto cargado", false);
+  var vlitros = validarNumeroCampo("litros", "Los litros cargados", true);
+
+  if(!vmonto.ok || !vlitros.ok){
+    return null;
+  }
+
+  var kms = obtenerKilometros();
+  if(!kms.ok){
+    return null;
+  }
+
+  var vrange = {ok:true, value:0};
+  if(el("metodo").value === "trip"){
+    vrange = validarNumeroCampo("range", "La autonomía restante", false);
+    if(!vrange.ok) return null;
+  }
+
+  var monto = vmonto.value;
+  var litros = vlitros.value;
+  var km = kms.km;
+  var range = vrange.value;
+
+  var kmL = km / litros;
+  var l100 = (litros / km) * 100;
+  var costoKm = monto > 0 ? monto / km : 0;
+  var costo100 = costoKm * 100;
+  var precioLitro = monto > 0 ? monto / litros : 0;
+  var proyectadoKm = range > 0 ? km + range : 0;
+
+  return {
+    monto:monto,
+    litros:litros,
+    km:km,
+    range:range,
+    kmInicial:kms.kmInicial,
+    kmFinal:kms.kmFinal,
+    kmL:kmL,
+    l100:l100,
+    costoKm:costoKm,
+    costo100:costo100,
+    precioLitro:precioLitro,
+    proyectadoKm:proyectadoKm,
+    metodo: textoMetodo(),
+    metodoValor: el("metodo").value
+  };
+}
+
+function evaluar(kmL, uso){
+  if(uso === "rural" || uso === "ciudad"){
+    if(kmL >= 11) return {nivel:"bueno", icono:"🟢", titulo:"Buen rendimiento", clase:"good", texto:"Buen rendimiento para manejo con topes, paradas y aceleraciones."};
+    if(kmL >= 9) return {nivel:"normal", icono:"🟡", titulo:"Rendimiento normal", clase:"mid", texto:"Rendimiento aceptable para ese tipo de manejo."};
+    return {nivel:"bajo", icono:"🔴", titulo:"Rendimiento bajo", clase:"bad", texto:"Conviene revisar presión de llantas, filtro de aire, bujías, sensores o frenos pegados."};
+  }
+
+  if(uso === "mixto"){
+    if(kmL >= 13) return {nivel:"bueno", icono:"🟢", titulo:"Buen rendimiento", clase:"good", texto:"Buen rendimiento para manejo mixto."};
+    if(kmL >= 11) return {nivel:"normal", icono:"🟡", titulo:"Rendimiento normal", clase:"mid", texto:"Rendimiento aceptable para manejo mixto."};
+    return {nivel:"bajo", icono:"🔴", titulo:"Rendimiento bajo", clase:"bad", texto:"Rendimiento algo bajo para manejo mixto."};
+  }
+
+  if(kmL >= 15) return {nivel:"bueno", icono:"🟢", titulo:"Buen rendimiento", clase:"good", texto:"Buen rendimiento para carretera."};
+  if(kmL >= 13) return {nivel:"normal", icono:"🟡", titulo:"Rendimiento normal", clase:"mid", texto:"Rendimiento aceptable para carretera."};
+  return {nivel:"bajo", icono:"🔴", titulo:"Rendimiento bajo", clase:"bad", texto:"Rendimiento bajo para carretera libre."};
+}
+
+function actualizarSemaforo(ev){
+  el("semaforoIcon").textContent = ev ? ev.icono : "⚪";
+  el("semaforoTitle").textContent = ev ? ev.titulo : "Sin evaluación";
+  el("semaforoText").textContent = ev ? ev.texto : "Captura tus datos y presiona Calcular.";
+}
+
+function limpiarResultados(){
+  el("kmL").textContent = "-- km/L";
+  el("l100").textContent = "-- L/100 km";
+  el("costoKm").textContent = "--";
+  el("costo100").textContent = "--";
+  el("precioLitro").value = "";
+  el("precioLitroResultado").textContent = "--";
+  el("proyectado").textContent = "--";
+  el("kmCalculados").value = "";
+  el("estatus").innerHTML = "Captura tus datos y presiona <b>Calcular</b>.";
+  actualizarSemaforo(null);
+}
+
+function calcular(mostrarAviso){
+  var r = calcularValores();
+
+  if(!r){
+    el("estatus").innerHTML = "Revisa los campos marcados. Los datos numéricos solo aceptan números y decimales.";
+    return null;
+  }
+
+  el("kmL").textContent = fmtNum(r.kmL, 2) + " km/L";
+  el("l100").textContent = fmtNum(r.l100, 2) + " L/100 km";
+  el("costoKm").textContent = r.monto > 0 ? money(r.costoKm) : "--";
+  el("costo100").textContent = r.monto > 0 ? money(r.costo100) : "--";
+  el("precioLitro").value = r.monto > 0 ? money(r.precioLitro) + " / L" : "";
+  el("precioLitroResultado").textContent = r.monto > 0 ? money(r.precioLitro) : "--";
+  el("proyectado").textContent = r.proyectadoKm > 0 ? fmtNum(r.proyectadoKm, 1) + " km" : "--";
+  el("kmCalculados").value = fmtNum(r.km, 1) + " km";
+
+  var ev = evaluar(r.kmL, el("uso").value);
+  actualizarSemaforo(ev);
+
+  var detalleKm = "";
+  if(r.metodoValor === "odometro"){
+    detalleKm = "<br><b>Km calculados:</b> " + fmtNum(r.km, 1) + " km. Se restó " + fmtNum(r.kmFinal, 1) + " - " + fmtNum(r.kmInicial, 1) + ".";
+  }
+
+  el("estatus").innerHTML =
+    "Te dio <b class=\"" + ev.clase + "\">" + fmtNum(r.kmL, 2) + " km/L</b>. " + ev.texto +
+    detalleKm +
+    (r.range > 0 ? "<br>Con la autonomía restante capturada, el total estimado sería de <b>" + fmtNum(r.proyectadoKm, 1) + " km</b>, aunque el range del tablero es aproximado." : "") +
+    "<br><b>Método:</b> " + r.metodo + "." +
+    "<br><b>Tipo de manejo:</b> " + textoManejo() + ".";
+
+  if(mostrarAviso !== false){
+    mostrarMensaje("Cálculo realizado correctamente.", "ok");
+  }
+
+  return r;
+}
+
+function guardar(){
+  var r = calcular(false);
+  if(!r) return;
+
+  var v = vehiculoActual();
+
+  var item = {
+    id: crearId("rec"),
+    vehicleId: v.id,
+    fecha: el("fecha").value || hoy(),
+    vehiculo: v.name,
+    metodo: r.metodo,
+    metodoValor: r.metodoValor,
+    uso: textoManejo(),
+    usoValor: el("uso").value,
+    monto: r.monto,
+    litros: r.litros,
+    km: r.km,
+    kmInicial: r.kmInicial,
+    kmFinal: r.kmFinal,
+    range: r.range,
+    kmL: r.kmL,
+    l100: r.l100,
+    costoKm: r.costoKm,
+    costo100: r.costo100,
+    precioLitro: r.precioLitro,
+    creado: new Date().toISOString()
+  };
+
+  appData.records.unshift(item);
+  var ok = guardarStorage();
+  renderTodo();
+  sugerirKmInicial(true);
+
+  if(ok){
+    el("estatus").innerHTML += "<br><b>Registro guardado correctamente en el historial.</b>";
+    mostrarMensaje("Registro guardado correctamente.", "ok");
+  }else{
+    el("estatus").innerHTML += "<br><b>Registro agregado en pantalla, pero tu navegador no permitió guardarlo permanentemente.</b>";
+    mostrarMensaje("Registro agregado en pantalla, pero no se pudo guardar localmente.", "error");
+  }
+}
+
+function calcularResumen(){
+  var records = registrosVehiculoActual();
+  var resumen = {
+    count: records.length,
+    promedio: 0,
+    mejor: 0,
+    peor: 0,
+    kmTotal: 0,
+    gastoTotal: 0,
+    litrosTotal: 0,
+    costoPromKm: 0
+  };
+
+  if(records.length === 0) return resumen;
+
+  var validosKmL = [];
+
+  for(var i=0; i<records.length; i++){
+    var r = records[i];
+    var kmL = Number(r.kmL || 0);
+    if(kmL > 0){
+      validosKmL.push(kmL);
+    }
+    resumen.kmTotal += Number(r.km || 0);
+    resumen.gastoTotal += Number(r.monto || 0);
+    resumen.litrosTotal += Number(r.litros || 0);
+  }
+
+  // Rendimiento acumulado real: km totales / litros totales.
+  // Es más correcto que promediar porcentajes/registros cuando las cargas tienen litros diferentes.
+  resumen.promedio = resumen.litrosTotal > 0 ? resumen.kmTotal / resumen.litrosTotal : 0;
+
+  if(validosKmL.length > 0){
+    resumen.mejor = Math.max.apply(null, validosKmL);
+    resumen.peor = Math.min.apply(null, validosKmL);
+  }
+
+  resumen.costoPromKm = resumen.kmTotal > 0 ? resumen.gastoTotal / resumen.kmTotal : 0;
+
+  return resumen;
+}
+
+function renderResumen(){
+  var r = calcularResumen();
+
+  el("totalHist").textContent = r.count;
+  el("promedioHist").textContent = r.promedio > 0 ? fmtNum(r.promedio, 2) + " km/L" : "-- km/L";
+  el("mejorHist").textContent = r.mejor > 0 ? fmtNum(r.mejor, 2) + " km/L" : "-- km/L";
+  el("peorHist").textContent = r.peor > 0 ? fmtNum(r.peor, 2) + " km/L" : "-- km/L";
+  el("kmTotales").textContent = r.kmTotal > 0 ? fmtNum(r.kmTotal, 1) + " km" : "--";
+  el("gastoTotal").textContent = r.gastoTotal > 0 ? money(r.gastoTotal) : "--";
+  el("litrosTotales").textContent = r.litrosTotal > 0 ? fmtNum(r.litrosTotal, 3) + " L" : "--";
+  el("costoPromKm").textContent = r.costoPromKm > 0 ? money(r.costoPromKm) : "--";
+}
+
+function renderHistorial(){
+  var tbody = el("historial");
+  tbody.innerHTML = "";
+
+  var records = registrosVehiculoActual();
+
+  if(records.length === 0){
+    tbody.innerHTML = "<tr><td colspan=\"13\" style=\"color:#94a3b8\">Aún no hay registros guardados para este vehículo.</td></tr>";
+    return;
+  }
+
+  var html = "";
+  for(var j=0; j<records.length; j++){
+    var r = records[j];
+    html += "<tr>" +
+      "<td>" + escapeHtml(r.fecha) + "</td>" +
+      "<td>" + escapeHtml(r.vehiculo) + "</td>" +
+      "<td>" + escapeHtml(r.metodo || "Trip reiniciado a 0") + "</td>" +
+      "<td>" + escapeHtml(r.uso) + "</td>" +
+      "<td>" + money(Number(r.monto || 0)) + "</td>" +
+      "<td>" + fmtNum(Number(r.litros || 0), 3) + "</td>" +
+      "<td>" + fmtNum(Number(r.km || 0), 1) + "</td>" +
+      "<td>" + (Number(r.kmInicial || 0) > 0 ? fmtNum(Number(r.kmInicial), 1) : "--") + "</td>" +
+      "<td>" + (Number(r.kmFinal || 0) > 0 ? fmtNum(Number(r.kmFinal), 1) : "--") + "</td>" +
+      "<td><b>" + fmtNum(Number(r.kmL || 0), 2) + "</b></td>" +
+      "<td>" + fmtNum(Number(r.l100 || 0), 2) + "</td>" +
+      "<td>" + (Number(r.costoKm || 0) > 0 ? money(Number(r.costoKm || 0)) : "--") + "</td>" +
+      "<td><button type=\"button\" class=\"danger small-btn\" onclick=\"eliminarRegistro('" + escapeHtml(r.id) + "')\">Eliminar</button></td>" +
+    "</tr>";
+  }
+
+  tbody.innerHTML = html;
+}
+
+function eliminarRegistro(id){
+  if(!confirm("¿Eliminar este registro?")) return;
+  appData.records = appData.records.filter(function(r){ return r.id !== id; });
+  guardarStorage();
+  renderTodo();
+  sugerirKmInicial(true);
+  mostrarMensaje("Registro eliminado correctamente.", "ok");
+}
+
+function borrarHistorialVehiculo(){
+  var v = vehiculoActual();
+  if(!confirm("¿Seguro que quieres borrar el historial de '" + v.name + "'? El vehículo se conserva.")){
+    return;
+  }
+
+  appData.records = appData.records.filter(function(r){ return r.vehicleId !== v.id; });
+  guardarStorage();
+  renderTodo();
+  limpiarResultados();
+  mostrarMensaje("Historial del vehículo borrado correctamente.", "warn");
+}
+
+function limpiar(){
+  el("monto").value = "";
+  el("litros").value = "";
+  el("kmTrip").value = "";
+  el("range").value = "";
+  el("kmFinal").value = "";
+  if(el("metodo").value !== "odometro"){
+    el("kmInicial").value = "";
+  }else{
+    sugerirKmInicial(true);
+  }
+  limpiarErrores();
+  limpiarResultados();
+}
+
+function dibujarGrafica(){
+  var canvas = el("grafica");
+  var ctx = canvas.getContext("2d");
+  var w = canvas.width;
+  var h = canvas.height;
+
+  ctx.clearRect(0,0,w,h);
+
+  ctx.fillStyle = "rgba(2,6,23,.40)";
+  ctx.fillRect(0,0,w,h);
+
+  var records = registrosOrdenadosVehiculo()
+    .filter(function(r){ return Number(r.kmL || 0) > 0; })
+    .slice(-12);
+
+  ctx.font = "16px Arial";
+  ctx.fillStyle = "#94a3b8";
+
+  if(records.length === 0){
+    ctx.fillText("Sin datos para graficar", 30, 45);
+    return;
+  }
+
+  var values = records.map(function(r){ return Number(r.kmL || 0); });
+  var min = Math.min.apply(null, values);
+  var max = Math.max.apply(null, values);
+
+  if(min === max){
+    min = Math.max(0, min - 1);
+    max = max + 1;
+  }
+
+  var padL = 48;
+  var padR = 24;
+  var padT = 28;
+  var padB = 42;
+  var chartW = w - padL - padR;
+  var chartH = h - padT - padB;
+
+  ctx.strokeStyle = "rgba(148,163,184,.20)";
+  ctx.lineWidth = 1;
+
+  for(var g=0; g<=4; g++){
+    var yGrid = padT + (chartH/4)*g;
+    ctx.beginPath();
+    ctx.moveTo(padL, yGrid);
+    ctx.lineTo(w-padR, yGrid);
+    ctx.stroke();
+
+    var labelVal = max - ((max-min)/4)*g;
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "12px Arial";
+    ctx.fillText(fmtNum(labelVal,1), 8, yGrid+4);
+  }
+
+  function xPos(i){
+    if(records.length === 1) return padL + chartW/2;
+    return padL + (chartW/(records.length-1))*i;
+  }
+
+  function yPos(v){
+    return padT + chartH - ((v-min)/(max-min))*chartH;
+  }
+
+  ctx.strokeStyle = "#38bdf8";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+
+  for(var i=0; i<values.length; i++){
+    var x = xPos(i);
+    var y = yPos(values[i]);
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  for(var j=0; j<values.length; j++){
+    var px = xPos(j);
+    var py = yPos(values[j]);
+
+    ctx.fillStyle = "#22c55e";
+    ctx.beginPath();
+    ctx.arc(px, py, 6, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = "#e5e7eb";
+    ctx.font = "12px Arial";
+    ctx.fillText(fmtNum(values[j],1), px-12, py-12);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(String(j+1), px-4, h-16);
+  }
+
+  ctx.fillStyle = "#e5e7eb";
+  ctx.font = "13px Arial";
+  ctx.fillText("km/L últimos registros", padL, 18);
+}
+
+function esIOS(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+function descargarBlob(contenido, tipo, nombreArchivo){
+  var blob = new Blob([contenido], {type: tipo});
+  var url = URL.createObjectURL(blob);
+
+  if(esIOS()){
+    var ventana = window.open(url, "_blank");
+    if(!ventana){
+      alert("iPhone bloqueó la descarga automática. Usa Copiar resumen o permite abrir la ventana.");
+    }
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+    return;
+  }
+
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+
+function datosVehiculoActual(){
+  return registrosVehiculoActual();
+}
+
+function datosParaExportar(){
+  var data = datosVehiculoActual();
+  if(data.length > 0) return data;
+
+  var r = calcularValores();
+  if(!r) return [];
+
+  var v = vehiculoActual();
+  return [{
+    id: crearId("rec"),
+    vehicleId: v.id,
+    fecha: el("fecha").value || hoy(),
+    vehiculo: v.name,
+    metodo: r.metodo,
+    metodoValor: r.metodoValor,
+    uso: textoManejo(),
+    monto: r.monto,
+    litros: r.litros,
+    km: r.km,
+    kmInicial: r.kmInicial,
+    kmFinal: r.kmFinal,
+    range: r.range,
+    kmL: r.kmL,
+    l100: r.l100,
+    costoKm: r.costoKm,
+    costo100: r.costo100,
+    precioLitro: r.precioLitro
+  }];
+}
+
+function resumenParaData(data){
+  var resumen = {count:data.length, promedio:0, mejor:0, peor:0, kmTotal:0, gastoTotal:0, litrosTotal:0, costoPromKm:0};
+  if(data.length === 0) return resumen;
+
+  var vals = [];
+  for(var i=0; i<data.length; i++){
+    var r = data[i];
+    var kmL = Number(r.kmL || 0);
+    if(kmL > 0) vals.push(kmL);
+    resumen.kmTotal += Number(r.km || 0);
+    resumen.gastoTotal += Number(r.monto || 0);
+    resumen.litrosTotal += Number(r.litros || 0);
+  }
+
+  resumen.promedio = resumen.litrosTotal > 0 ? resumen.kmTotal / resumen.litrosTotal : 0;
+
+  if(vals.length > 0){
+    resumen.mejor = Math.max.apply(null, vals);
+    resumen.peor = Math.min.apply(null, vals);
+  }
+
+  resumen.costoPromKm = resumen.kmTotal > 0 ? resumen.gastoTotal / resumen.kmTotal : 0;
+  return resumen;
+}
+
+function exportarExcel(){
+  var data = datosParaExportar();
+  if(data.length === 0){
+    alert("No hay datos para exportar. Captura los datos y presiona Guardar registro.");
+    return;
+  }
+
+  var resumen = resumenParaData(data);
+  var filas = "";
+
+  for(var i=0; i<data.length; i++){
+    var x = data[i];
+    filas += "<tr>" +
+      "<td>" + escapeHtml(x.fecha) + "</td>" +
+      "<td>" + escapeHtml(x.vehiculo) + "</td>" +
+      "<td>" + escapeHtml(x.metodo || "Trip reiniciado a 0") + "</td>" +
+      "<td>" + escapeHtml(x.uso) + "</td>" +
+      "<td style=\"mso-number-format:'0.00';\">" + Number(x.monto || 0).toFixed(2) + "</td>" +
+      "<td style=\"mso-number-format:'0.000';\">" + Number(x.litros || 0).toFixed(3) + "</td>" +
+      "<td style=\"mso-number-format:'0.0';\">" + Number(x.km || 0).toFixed(1) + "</td>" +
+      "<td style=\"mso-number-format:'0.0';\">" + (Number(x.kmInicial || 0) > 0 ? Number(x.kmInicial || 0).toFixed(1) : "") + "</td>" +
+      "<td style=\"mso-number-format:'0.0';\">" + (Number(x.kmFinal || 0) > 0 ? Number(x.kmFinal || 0).toFixed(1) : "") + "</td>" +
+      "<td style=\"mso-number-format:'0.00';\">" + Number(x.kmL || 0).toFixed(2) + "</td>" +
+      "<td style=\"mso-number-format:'0.00';\">" + Number(x.l100 || 0).toFixed(2) + "</td>" +
+      "<td style=\"mso-number-format:'0.00';\">" + Number(x.costoKm || 0).toFixed(2) + "</td>" +
+      "<td style=\"mso-number-format:'0.00';\">" + Number(x.costo100 || 0).toFixed(2) + "</td>" +
+      "<td style=\"mso-number-format:'0.00';\">" + Number(x.precioLitro || 0).toFixed(2) + "</td>" +
+    "</tr>";
+  }
+
+  var htmlExcel =
+    "<html><head><meta charset=\"UTF-8\">" +
+    "<style>table{border-collapse:collapse}th,td{border:1px solid #999;padding:6px;font-family:Arial;font-size:12px}th{background:#d9eaf7;font-weight:bold}.res th{background:#b7e1cd}h3,p{font-family:Arial}</style>" +
+    "</head><body>" +
+    "<h3>Historial de rendimiento de combustible</h3>" +
+    "<p>Elaborado por Cristian Larios</p>" +
+    "<table class=\"res\"><tr><th>Vehículo</th><th>Registros</th><th>Rendimiento acumulado km/L</th><th>Mejor km/L</th><th>Peor km/L</th><th>Km totales</th><th>Gasto total</th><th>Litros totales</th><th>Costo promedio/km</th></tr>" +
+    "<tr><td>" + escapeHtml(vehiculoActual().name) + "</td><td>" + resumen.count + "</td><td>" + resumen.promedio.toFixed(2) + "</td><td>" + resumen.mejor.toFixed(2) + "</td><td>" + resumen.peor.toFixed(2) + "</td><td>" + resumen.kmTotal.toFixed(1) + "</td><td>" + resumen.gastoTotal.toFixed(2) + "</td><td>" + resumen.litrosTotal.toFixed(3) + "</td><td>" + resumen.costoPromKm.toFixed(2) + "</td></tr></table><br>" +
+    "<table><thead><tr>" +
+    "<th>Fecha</th><th>Vehículo</th><th>Método</th><th>Tipo de manejo</th><th>Monto</th><th>Litros</th><th>Kilómetros recorridos</th><th>Km inicial</th><th>Km final</th><th>km/L</th><th>L/100 km</th><th>Costo por km</th><th>Costo por 100 km</th><th>Precio por litro</th>" +
+    "</tr></thead><tbody>" + filas + "</tbody></table>" +
+    "</body></html>";
+
+  descargarBlob("\ufeff" + htmlExcel, "application/vnd.ms-excel;charset=utf-8;", "historial_rendimiento_combustible.xls");
+  mostrarMensaje("Archivo Excel generado correctamente.", "ok");
+}
+
+function csvText(value){
+  return "\"" + String(value || "").replace(/"/g, '""') + "\"";
+}
+
+function exportarCSV(){
+  var data = datosParaExportar();
+  if(data.length === 0){
+    alert("No hay datos para exportar. Captura los datos y presiona Guardar registro.");
+    return;
+  }
+
+  var headers = [
+    "Fecha","Vehiculo","Metodo","Tipo de manejo","Monto","Litros","Kilometros recorridos","Km inicial","Km final",
+    "Km por litro","Litros por 100 km","Costo por km","Costo por 100 km","Precio por litro"
+  ];
+
+  var csv = "sep=;\n";
+  csv += headers.join(";") + "\n";
+
+  for(var i=0; i<data.length; i++){
+    var x = data[i];
+    var row = [
+      x.fecha || "",
+      csvText(x.vehiculo || ""),
+      csvText(x.metodo || "Trip reiniciado a 0"),
+      csvText(x.uso || ""),
+      Number(x.monto || 0).toFixed(2),
+      Number(x.litros || 0).toFixed(3),
+      Number(x.km || 0).toFixed(1),
+      Number(x.kmInicial || 0) > 0 ? Number(x.kmInicial || 0).toFixed(1) : "",
+      Number(x.kmFinal || 0) > 0 ? Number(x.kmFinal || 0).toFixed(1) : "",
+      Number(x.kmL || 0).toFixed(2),
+      Number(x.l100 || 0).toFixed(2),
+      Number(x.costoKm || 0).toFixed(2),
+      Number(x.costo100 || 0).toFixed(2),
+      Number(x.precioLitro || 0).toFixed(2)
+    ];
+    csv += row.join(";") + "\n";
+  }
+
+  descargarBlob("\ufeff" + csv, "text/csv;charset=utf-8;", "historial_rendimiento_combustible.csv");
+  mostrarMensaje("Archivo CSV generado correctamente.", "ok");
+}
+
+function copiarResumen(){
+  var data = datosParaExportar();
+  if(data.length === 0){
+    alert("No hay datos para copiar. Captura los datos y presiona Calcular o Guardar registro.");
+    return;
+  }
+
+  var x = data[0];
+  var texto =
+    "Rendimiento de combustible\n" +
+    "Elaborado por Cristian Larios\n" +
+    "Fecha: " + (x.fecha || "") + "\n" +
+    "Vehículo: " + (x.vehiculo || "") + "\n" +
+    "Método: " + (x.metodo || "") + "\n" +
+    "Manejo: " + (x.uso || "") + "\n" +
+    "Monto: " + money(Number(x.monto || 0)) + "\n" +
+    "Litros: " + fmtNum(Number(x.litros || 0), 3) + "\n" +
+    "Km recorridos: " + fmtNum(Number(x.km || 0), 1) + "\n" +
+    (Number(x.kmInicial || 0) > 0 ? "Km inicial: " + fmtNum(Number(x.kmInicial), 1) + "\n" : "") +
+    (Number(x.kmFinal || 0) > 0 ? "Km final: " + fmtNum(Number(x.kmFinal), 1) + "\n" : "") +
+    "km/L: " + fmtNum(Number(x.kmL || 0), 2) + "\n" +
+    "L/100 km: " + fmtNum(Number(x.l100 || 0), 2) + "\n" +
+    "Costo por km: " + money(Number(x.costoKm || 0));
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto).then(function(){
+      mostrarMensaje("Resumen copiado correctamente.", "ok");
+    }).catch(function(){
+      alert(texto);
+    });
+  }else{
+    alert(texto);
+  }
+}
+
+function exportarRespaldo(){
+  var respaldo = {
+    tipo:"control-combustible",
+    version:15,
+    exportado:new Date().toISOString(),
+    data:appData
+  };
+  descargarBlob(JSON.stringify(respaldo, null, 2), "application/json;charset=utf-8;", "respaldo_control_combustible.json");
+  mostrarMensaje("Respaldo JSON generado correctamente.", "ok");
+}
+
+function abrirImportar(){
+  el("importFile").click();
+}
+
+function importarRespaldo(event){
+  var file = event.target.files[0];
+  if(!file) return;
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var obj = JSON.parse(e.target.result);
+      var data = obj.data || obj;
+
+      if(!data || !Array.isArray(data.vehicles) || !Array.isArray(data.records)){
+        alert("El archivo no tiene el formato correcto.");
+        return;
+      }
+
+      if(!confirm("Esto reemplazará los datos actuales por el respaldo. ¿Continuar?")){
+        return;
+      }
+
+      appData = {
+        version:15,
+        selectedVehicleId:data.selectedVehicleId || "",
+        vehicles:data.vehicles,
+        records:data.records
+      };
+
+      asegurarVehiculoBase();
+      guardarStorage();
+      renderTodo();
+      limpiarResultados();
+      mostrarMensaje("Respaldo importado correctamente.", "ok");
+    }catch(err){
+      mostrarMensaje("No se pudo importar el respaldo.", "error");
+      alert("No se pudo importar el respaldo.");
+    }finally{
+      event.target.value = "";
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function renderTodo(){
+  asegurarVehiculoBase();
+  renderVehiculos();
+  renderResumen();
+  renderHistorial();
+  sugerirKmInicial(false);
+  dibujarGrafica();
+}
+
+function registrarEventos(){
+  var numericos = ["monto","litros","kmTrip","range","kmInicial","kmFinal"];
+  for(var i=0; i<numericos.length; i++){
+    el(numericos[i]).addEventListener("input", function(){ sanitizarNumeroInput(this); });
+  }
+
+  el("monto").addEventListener("blur", function(){ normalizarCampo("monto", 2); });
+  el("litros").addEventListener("blur", function(){ normalizarCampo("litros", 3); });
+  el("kmTrip").addEventListener("blur", function(){ normalizarCampo("kmTrip", 1); });
+  el("range").addEventListener("blur", function(){ normalizarCampo("range", 1); });
+  el("kmInicial").addEventListener("blur", function(){ normalizarCampo("kmInicial", 1); });
+  el("kmFinal").addEventListener("blur", function(){ normalizarCampo("kmFinal", 1); });
+
+  window.addEventListener("resize", function(){ dibujarGrafica(); });
+}
+
+async function iniciar(){
+  el("fecha").value = hoy();
+  registrarEventos();
+
+  // Primero carga respaldo local para que la app funcione aunque no haya internet.
+  cargarStorage();
+  var datosLocalesAntesDeNube = clonarAppData(appData);
+  renderTodo();
+  cambiarMetodo();
+
+  // Después intenta conectar con Supabase. Si ya hay datos en la nube, los combina con lo local
+  // para no perder capturas que se hayan quedado pendientes por falta de internet.
+  var okSupabase = await iniciarSupabase();
+  if(okSupabase){
+    await cargarDatosSupabase(datosLocalesAntesDeNube);
+    renderTodo();
+    cambiarMetodo();
+  }
+}
+
+iniciar();
+</script>
+</body>
+</html>
